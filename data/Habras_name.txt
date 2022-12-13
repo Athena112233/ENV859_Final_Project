@@ -1,8 +1,0 @@
-1	Differentially eroded bedrock
-2	Fractured granite
-3	Granite canyon
-4	Local sediment covered different
-5	Mixed bimodal sediment over bedrock
-6	Sediment and granite
-7	Sedimentary canyon
-8	Unconsolidated sediment
