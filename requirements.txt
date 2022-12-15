@@ -3,3 +3,4 @@ xgboost
 geopandas 
 torch
 simpledbf
+scikit-learn
