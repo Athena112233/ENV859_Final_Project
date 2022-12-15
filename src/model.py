@@ -1,6 +1,7 @@
 import xgboost as xgb
 from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import sys, os
@@ -58,5 +59,41 @@ def build_model(files):
     
     
 def make_predictions(files):
-    pass
+    arcpy.env.workspace = 'sratch'
+    arcpy.env.overwriteOutput = True
     
+    # preprocess data
+    data, label = preprocess_data.preprocess_eval_data(files)
+    dbf = Dbf5(data)
+    df = dbf.to_dataframe()
+    print(df.columns)
+    X = df.drop(columns = ['prediction', 'X', 'Y'])
+    
+    # load pre-trained model
+    model = pickle.load(open('../../scratch/xgb_model.pkl', 'rb'))
+    predictions = model.predict(X)
+    
+    # Set local variables
+    df['habitat_prediction'] = predictions
+    
+    # convert pd to gdf
+    final_gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.X, df.Y))
+    
+    # save gpd as shp
+    final_gdf.to_file('final_predictions.shp')
+    
+
+files = ['V:\\ENV859_Final_Project_al512\\data\\bathy',
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_1', 
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_2', 
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_3', 
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_4', 
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_5',
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_6',
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_7',
+         'V:\\ENV859_Final_Project_al512\\data\\habras10_8', 
+         'V:\\ENV859_Final_Project_al512\\data\\dist_kelp', 
+         'V:\\ENV859_Final_Project_al512\\data\\dist_100m', 
+         'V:\\ENV859_Final_Project_al512\\data\\botc10_8ws', '#', '#']
+
+make_predictions(files)

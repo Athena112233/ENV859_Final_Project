@@ -11,7 +11,7 @@ def preprocess_train_data(files):
     param files: 
     """
     # set up env
-    arcpy.env.workspace = 'scratch'
+    arcpy.env.workspace = 'data'
     arcpy.env.overwriteOutput = True
     #save_path = '../scratch/'
     
@@ -37,3 +37,26 @@ def preprocess_train_data(files):
     rnd_label = np.array([0]*rnd_count)
 
     return obs_table, obs_label, rnd_table, rnd_label
+
+
+def preprocess_eval_data(files):
+    # define env
+    arcpy.env.workspace = 'scratch'
+    arcpy.env.overwriteOutput = True
+    
+    # gather the raster files
+    files = np.array(files)
+    rasters = list(files[files != '#'])
+    
+    # create random points
+    points = arcpy.management.CreateRandomPoints('../../scratch', 
+                                        'prediction_points',  
+                                        constraining_extent = rasters[0], 
+                                        number_of_points_or_field = 300)
+    
+    out_table = '../../scratch/prediction_sampled.dbf'
+    out_points = arcpy.sa.Sample(rasters, points, out_table)
+    out_count = int(arcpy.management.GetCount(out_table)[0])
+    out_label = np.array([1]*out_count)
+    
+    return out_table, out_label

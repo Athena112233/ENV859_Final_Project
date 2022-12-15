@@ -1,7 +1,7 @@
 import sys
 import os
 import arcpy
-#from model import build_model
+from model import make_predictions
 
 sys.path.append('V:\ENV859_Final_Project_al512\Scripts\src')
 
