@@ -1,11 +1,13 @@
 import xgboost as xgb
 from xgboost import XGBClassifier
+from sklearn.model_selection import GridSearchCV
 import numpy as np
 import pandas as pd
 import sys, os
 import preprocess_data
 import pickle
-import Dbf5
+from simpledbf import Dbf5
+import arcpy
 
 def build_model(files):
     """
@@ -13,12 +15,15 @@ def build_model(files):
     
     param files: 
     """
+    arcpy.env.workspace = 'sratch'
+    arcpy.env.overwriteOutput = True
+    save_path = 'scratch/'
     # preprocess data
     obs_path, obs_label, rnd_path, rnd_label = preprocess_data.preprocess_train_data(files)
     
     # read training file
-    obs_dbf = Dbf5(obs_path)
-    rnd_dbf = Dbf5(rnd_path)
+    obs_dbf = Dbf5(save_path + obs_path)
+    rnd_dbf = Dbf5(save_path + rnd_path)
     obs_df = obs_dbf.to_dataframe()
     rnd_df = rnd_dbf.to_dataframe()
 
@@ -34,9 +39,9 @@ def build_model(files):
     # build xgboost model
     clf = XGBClassifier(objective= 'binary:logistic')
     parameters = {
-        'max_depth': range (2, 10),
-        'n_estimators': range(60, 220, 40),
-        'learning_rate': [0.1, 0.01, 0.05]
+        'max_depth': range (2, 5),
+        'n_estimators': [40, 60],
+        'learning_rate': [0.1, 0.05]
     }
     grid_search = GridSearchCV(
         estimator = clf,
@@ -45,6 +50,13 @@ def build_model(files):
         n_jobs = 5,
         cv = 5,
         verbose = True)
+    
     grid_search.fit(X, Y)
     
-    model_path = "../../scratch/xgb_model.pkl"
+    model_path = "xgb_model.pkl"
+    pickle.dump(grid_search, open(model_path, "wb"))
+    
+    
+def make_predictions(files):
+    pass
+    
