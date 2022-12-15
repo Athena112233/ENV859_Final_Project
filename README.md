@@ -46,5 +46,15 @@ The pipeline preprocess the data by sampling the raster layers with the observed
 The pipeline would randomly generated 300 points within the raster layer's boundary. Using the 300 newly genereted random points, we sample the input raster layers using Arcpy Sample again to extract environmetal information. Unfortunately, this tool cannot make prediction on the entire raster layer's region. However, if the user creates enough random datapoints that represent the overall raster region, the predictions could be insightful. 
 
 ### Training/Validating/Testing
+1. Model: XGBoost Tree model binary classifier
+2. Since there are only roughly 300 training data points, we need to use k-fold cross validation to train and validate the model. By training and validating the model over 5 folds of data, the model accuracy reached 98%.
+3. The model requires the same number of rasters files for training and making predictions. If the model failed to predict, please check you listed the right numbers of raster layars. 
+4. The modle requires the raster inputs to be in the same order for training and making predictions.
+
+![image](https://user-images.githubusercontent.com/43796329/207917824-9708b1a8-3207-4ab8-a55f-cf54a1238c38.png)
+
 ### Model Packaging
+After training, the model wil be packaged into a pickle file and saved to the scracth folder. This model can be used outside of this project. 
+
 ### Output Results
+The final output of this project is a shape file containing points feature class. The points in this class are randomly generated within the boundary of the region for analysis. Each point would contain the environmental information extracted from the raster files. And, each point would contain a field name "habitat_prediction" that indicates if a blue rockfish will appear at the location or not.
